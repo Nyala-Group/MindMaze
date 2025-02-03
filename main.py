@@ -12,6 +12,7 @@ WALL_COLOR = (0, 0, 0)
 PATH_COLOR = (255, 255, 255)
 START_COLOR = (0, 255, 0)
 END_COLOR = (255, 0, 0)
+MOVE_AMOUNT = 0.1
 
 
 class Maze:
@@ -96,6 +97,60 @@ class Maze:
             self.end = (self.size * 2 - 1, self.size * 2 - 1)
 
 
+class Object:
+    def Delete(self):
+        del self
+
+
+class Wall(Object):
+    def __init__(self, leftWall, topWall, width, height):
+        self.box = pygame.Rect(leftWall, topWall, width, height)
+        self.color = WALL_COLOR
+
+    def Draw(self, screen):
+        pygame.draw.rect(screen, self.color, self.box)
+
+
+class Player(Object):
+    def __init__(self, startX, startY, screen):
+        self.x = startX
+        self.y = startY
+        self.width = CELL_SIZE * 0.75
+        self.rad = self.width / 2
+        self.color = (0, 0, 255)
+        self.screen = screen
+
+        self.box = pygame.Rect(
+            (self.x - self.rad), (self.y - self.rad), self.width, self.width
+        )
+
+    def Update(self, x, y):
+        self.x = x
+        self.y = y
+        self.box.update(
+            (self.x - self.rad), (self.y - self.rad), self.width, self.width
+        )
+        self.Draw()
+
+    def Move(self, xChange, yChange):
+        self.x += xChange
+        self.y += yChange
+        self.box.update(
+            (self.x - self.rad), (self.y - self.rad), self.width, self.width
+        )
+        for wall in walls:
+            if wall.box.colliderect(self.box):
+                self.x -= xChange
+                self.y -= yChange
+                self.box.update(
+                    (self.x - self.rad), (self.y - self.rad), self.width, self.width
+                )
+        self.Draw()
+
+    def Draw(self):
+        pygame.draw.circle(self.screen, self.color, (self.x, self.y), self.rad)
+
+
 # Pygame rendering function
 def draw_maze(screen, maze):
     expanded_size = maze.size * 2 + 1
@@ -128,6 +183,18 @@ def draw_maze(screen, maze):
     )
 
 
+def drawWalls(screen, maze):
+    expanded_size = maze.size * 2 + 1
+    for y in range(expanded_size):
+        for x in range(expanded_size):
+            if maze.grid[y][x] == 0:
+                wall = Wall(
+                    x * CELL_SIZE + MARGIN, y * CELL_SIZE + MARGIN, CELL_SIZE, CELL_SIZE
+                )
+                walls.append(wall)
+                wall.Draw(screen)
+
+
 # Pygame setup
 def main():
     grid_size = 16  # Default grid size
@@ -140,20 +207,70 @@ def main():
     )
 
     pygame.init()
+    global objectList
+    objectList = list()
+    global walls
+    walls = list()
     screen = pygame.display.set_mode(screen_size)
     pygame.display.set_caption("Maze Generator")
     clock = pygame.time.Clock()
+    pygame.key.set_repeat(True)
+
+    global PlayerController
+    PlayerController = Player(0, 0, screen)
+    screen.fill(WALL_COLOR)
+    draw_maze(screen, maze)
+    drawWalls(screen, maze)
+    start_x, start_y = maze.start
+    PlayerController.Update(
+        ((start_x + 0.5) * CELL_SIZE + MARGIN), ((start_y + 0.5) * CELL_SIZE + MARGIN)
+    )
 
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-            elif event.type == pygame.KEYDOWN and event.key == pygame.K_z:
+            elif event.type == pygame.KEYUP and event.key == pygame.K_z:
+                for obj in objectList:
+                    obj.Delete()
+                for wall in walls:
+                    wall.Delete()
                 maze = Maze(grid_size)
                 maze.generate()
+                PlayerController.Update(
+                    ((start_x + 0.5) * CELL_SIZE + MARGIN),
+                    ((start_y + 0.5) * CELL_SIZE + MARGIN),
+                )
+            elif event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_w:
+                    # minus Y
+                    PlayerController.Move(0, -MOVE_AMOUNT)
+                    pygame.display.flip()
+                    PlayerController.Move(0, -MOVE_AMOUNT)
+                    pygame.display.flip()
+                if event.key == pygame.K_a:
+                    # minus X
+                    PlayerController.Move(-MOVE_AMOUNT, 0)
+                    pygame.display.flip()
+                    PlayerController.Move(-MOVE_AMOUNT, 0)
+                    pygame.display.flip()
+                if event.key == pygame.K_s:
+                    # plus Y
+                    PlayerController.Move(0, MOVE_AMOUNT)
+                    pygame.display.flip()
+                    PlayerController.Move(0, MOVE_AMOUNT)
+                    pygame.display.flip()
+                if event.key == pygame.K_d:
+                    # plus X
+                    PlayerController.Move(MOVE_AMOUNT, 0)
+                    pygame.display.flip()
+                    PlayerController.Move(MOVE_AMOUNT, 0)
+                    pygame.display.flip()
+
         screen.fill(WALL_COLOR)
         draw_maze(screen, maze)
+        PlayerController.Draw()
         pygame.display.flip()
 
         for event in pygame.event.get():
