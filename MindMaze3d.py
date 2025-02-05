@@ -5,17 +5,21 @@ pygame.init()
 pygame.display.set_caption("Mind Maze!")
 
 # Constants
-WIDTH = 610
-HEIGHT = 400
+BLOCK_WIDTH = 10
+BLOCK_HEIGHT = 10
+
+MAZE_SIZE = 16
+
+MARGIN = 10
+
+HEIGHT = 400 + MARGIN
+WIDTH = HEIGHT + (BLOCK_WIDTH * (2 * MAZE_SIZE + 1))
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (100, 180, 0)
 RED = (255, 0, 0)
 BLACK = (0, 0, 0)
 DARK_WHITE = (50, 50, 50)
-
-BLOCK_WIDTH = 10
-BLOCK_HEIGHT = 10
 
 
 class SpriteSheet(object):
@@ -73,6 +77,21 @@ class Maze:
                 neighbors.append((nx, ny))
         return neighbors
 
+    def find_dead_ends(self):
+        # A function to find dead ends within the maze by checking that only one neighbor for a checked cell is marked as a path
+        dead_ends = []
+        for y in range(1, self.size * 2, 2):
+            for x in range(1, self.size * 2, 2):
+                if self.grid[y][x] == 0:
+                    neighbors = sum(
+                        1
+                        for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                        if self.grid[y + dy][x + dx] == 1
+                    )
+                    if neighbors == 3:
+                        dead_ends.append((x, y))
+        return dead_ends
+
     def carve_path(self, x1, y1, x2, y2):
         gx1, gy1 = x1 * 2 + 1, y1 * 2 + 1
         gx2, gy2 = x2 * 2 + 1, y2 * 2 + 1
@@ -96,14 +115,21 @@ class Maze:
             else:
                 self.stack.pop()
 
-        return self.grid
+        dead_ends = self.find_dead_ends()
+        if dead_ends:
+            self.end = dead_ends[random.randint(-((len(dead_ends) // 4)), -1)]
+        else:
+            self.end = (self.size * 2 - 1, self.size * 2 - 1)
+
+        return self.grid, self.end
 
 
 class Game(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
+        self.flags = pygame.RESIZABLE
 
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.screen = pygame.display.set_mode((WIDTH, HEIGHT), self.flags)
         self.clock = pygame.time.Clock()
 
         self.frame_itter = 0
@@ -119,7 +145,7 @@ class Game(pygame.sprite.Sprite):
         self.maze_sheet = maze_sheet.make_sprite_array(0, 0, 200, 200, 41, 41, 2)
         self.maze_img = self.maze_sheet[0]
         self.maze_rect = self.maze_img.get_rect()
-        self.maze_rect.x = 210
+        self.maze_rect.x = BLOCK_WIDTH * (2 * MAZE_SIZE + 1)
         self.maze_rect.y = 0
 
         self.dir = [-1, 0]
@@ -135,8 +161,8 @@ class Game(pygame.sprite.Sprite):
         #     [1,0,0,0,0,1,1],
         #     [1,1,1,1,1,1,1]]
 
-        newMaze = Maze(10)
-        self.maze = newMaze.generate()
+        newMaze = Maze(MAZE_SIZE)
+        self.maze, self.mazeEnd = newMaze.generate()
 
         # this is a mapping of our players line of sight corrisponding to the correct index of an image sheet
         # the order is regardless of direction its: left of player, right, left+1, front, right+1, left+2, front+2, right+2
@@ -337,6 +363,16 @@ class Game(pygame.sprite.Sprite):
         # Render each 2d wall for mini map
         for wall in self.walls:
             pygame.draw.rect(self.screen, BLACK, (wall[0], wall[1], wall[2], wall[3]))
+
+        # Render the end point in red
+        end_y, end_x = self.mazeEnd
+        pygame.draw.rect(
+            self.screen,
+            RED,
+            pygame.Rect(
+                end_x * BLOCK_WIDTH, end_y * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT
+            ),
+        )
 
         # Render mini map green arrow character
         self.screen.blit(self.arrow_img, self.arrow_rect)
