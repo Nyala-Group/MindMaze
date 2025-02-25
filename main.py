@@ -136,13 +136,6 @@ class Game(pygame.sprite.Sprite):
         self.arrow_rect = self.arrow_img.get_rect()
         self.arrow_rect.x = BLOCK_WIDTH * 1
         self.arrow_rect.y = BLOCK_HEIGHT * 1
-
-        maze_sheet = SpriteSheet("maze-sheet.png")
-        self.maze_sheet = maze_sheet.make_sprite_array(0, 0, 200, 200, 42, 42, 2)
-        self.maze_img = self.maze_sheet[0]
-        self.maze_rect = self.maze_img.get_rect()
-        self.maze_rect.x = 210
-        self.maze_rect.y = 0
         
         walls_sheet = SpriteSheet("walls-sheet.png")
         self.walls_sheet = walls_sheet.make_sprite_array(0, 0, 194, 194, 19, 19, 2)
