@@ -143,6 +143,13 @@ class Game(pygame.sprite.Sprite):
         self.maze_rect = self.maze_img.get_rect()
         self.maze_rect.x = 210
         self.maze_rect.y = 0
+        
+        walls_sheet = SpriteSheet("walls-sheet.png")
+        self.walls_sheet = walls_sheet.make_sprite_array(0, 0, 194, 194, 19, 19, 2)
+        self.walls_img = self.walls_sheet[0]
+        self.walls_rect = self.walls_img.get_rect()
+        self.walls_rect.x = 210
+        self.walls_rect.y = 0
 
         self.toggleAltHallway = True
 
@@ -151,56 +158,11 @@ class Game(pygame.sprite.Sprite):
         self.dir = [-1, 0]
 
         self.walls = []
+        
+        self.wallView = "111011010000"
 
         newMaze = Maze(10)
         self.maze, self.mazeEnd = newMaze.generate()
-
-        # this is a mapping of our players line of sight corrisponding to the correct index of an image sheet
-        # the order is regardless of direction its: left of player, right, left+1, front, right+1, left+2, front+2, right+2
-        # 1's are walls and 0's are floor each image at the index is the same
-        self.imageTable = {
-            "11101101": 0,
-            "11101111": 1,
-            "11111111": 2,
-            "11101001": 3,
-            "11001111": 4,
-            "01111111": 5,
-            "11101100": 6,
-            "11100111": 7,
-            "10111111": 8,
-            "11101000": 9,
-            "11000111": 10,
-            "00111111": 11,
-            "11000101": 12,
-            "00101111": 13,
-            "00011111": 14,
-            "10101001": 15,
-            "01101100": 16,
-            "10101101": 17,
-            "01101101": 18,
-            "11001100": 19,
-            "11100001": 20,
-            "10110111": 21,
-            "01011111": 22,
-            "01100101": 23,
-            "10001101": 24,
-            "00101000": 25,
-            "00110111": 26,
-            "11100101": 27,
-            "11001101": 28,
-            "10101111": 29,
-            "01101111": 30,
-            "11000110": 31,
-            "11000011": 32,
-            "00101001": 33,
-            "00101100": 34,
-            "01101000": 35,
-            "10101000": 36,
-            "00010111": 37,
-            "01101001": 38,
-            "10101100": 39,
-            "00101101": 40,
-        }
 
         self.mazeHeight = len(self.maze)
         self.mazeWidth = len(self.maze[0])
@@ -315,58 +277,106 @@ class Game(pygame.sprite.Sprite):
 
         # RIGHT
         if self.dir == [1, 0]:
+            self.wallView = self.makeKey(self.checkRight())
             self.arrow_img = self.arrow_sheet[
                 2
             ]  # show correct mini-map arrow direction
 
-            index = self.imageTable[
-                self.makeKey(self.checkRight())
-            ]  # return index for image, based on direction we are looking
-            index = self.toggleAltWall(index)  # switch halloway image if appropriate
-            self.maze_img = self.maze_sheet[index]  # show chosen image
-
         # LEFT
         elif self.dir == [-1, 0]:
+            self.wallView = self.makeKey(self.checkLeft())
             self.arrow_img = self.arrow_sheet[
                 3
             ]  # show correct mini-map arrow direction
 
-            index = self.imageTable[
-                self.makeKey(self.checkLeft())
-            ]  # return index for image, based on direction we are looking
-            index = self.toggleAltWall(index)  # switch halloway image if appropriate
-            self.maze_img = self.maze_sheet[index]  # show chosen image
 
         # DOWN
         elif self.dir == [0, 1]:
+            self.wallView = self.makeKey(self.checkDown())
             self.arrow_img = self.arrow_sheet[
                 0
             ]  # show correct mini-map arrow direction
 
-            index = self.imageTable[
-                self.makeKey(self.checkDown())
-            ]  # return index for image, based on direction we are looking
-            index = self.toggleAltWall(index)  # switch halloway image if appropriate
-            self.maze_img = self.maze_sheet[index]  # show chosen image
 
         # UP
         elif self.dir == [0, -1]:
+            self.wallView = self.makeKey(self.checkUp())
             self.arrow_img = self.arrow_sheet[
                 1
             ]  # show correct mini-map arrow direction
 
-            index = self.imageTable[
-                self.makeKey(self.checkUp())
-            ]  # return index for image, based on direction we are looking
-            index = self.toggleAltWall(index)  # switch halloway image if appropriate
-            self.maze_img = self.maze_sheet[index]  # show chosen image
 
+    # needs to be optimized right now renders some unseen walls but works for player
+    def renderWalls(self):
+        # always render background roof and floor
+        self.screen.blit(self.walls_sheet[0],self.walls_rect)
+        
+        # row 4 ---------------------------------------------------------------
+        # render wall infront of player
+        if(self.wallView[11] == '1'):
+            self.screen.blit(self.walls_sheet[18],self.walls_rect)
+            
+        # row 3 ---------------------------------------------------------------
+        # wall to player front left+2
+        if(self.wallView[8] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[1],self.walls_rect)
+            self.screen.blit(self.walls_sheet[4],self.walls_rect)
+        # wall to player front right+2
+        if(self.wallView[10] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[2],self.walls_rect)
+            self.screen.blit(self.walls_sheet[5],self.walls_rect)
+        # render wall infront of player
+        if(self.wallView[9] == '1'):
+            self.screen.blit(self.walls_sheet[3],self.walls_rect)
+        
+        # row 2 ---------------------------------------------------------------
+        # wall to player front left+1
+        if(self.wallView[5] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[7],self.walls_rect)
+            self.screen.blit(self.walls_sheet[9],self.walls_rect)
+        # wall to player front right+1
+        if(self.wallView[7] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[8],self.walls_rect)
+            self.screen.blit(self.walls_sheet[10],self.walls_rect)
+        # render wall infront of player
+        if(self.wallView[6] == '1'):
+            self.screen.blit(self.walls_sheet[12],self.walls_rect)
+            
+        # row 1 in front of player --------------------------------------------
+        # wall to player front left
+        if(self.wallView[2] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[10],self.walls_rect)
+            self.screen.blit(self.walls_sheet[16],self.walls_rect)
+        # wall to player front right
+        if(self.wallView[4] == '1'):
+            # render its front face and side face
+            self.screen.blit(self.walls_sheet[11],self.walls_rect)
+            self.screen.blit(self.walls_sheet[17],self.walls_rect)
+        # render wall directly infront of player
+        if(self.wallView[3] == '1'):
+            self.screen.blit(self.walls_sheet[13],self.walls_rect)
+            
+            
+        # row 0 containging player --------------------------------------------
+        # render wall to your left peripheral
+        if(self.wallView[0] == '1'):
+            self.screen.blit(self.walls_sheet[15],self.walls_rect)
+        # render wall to your right peripheral
+        if(self.wallView[1] == '1'):
+            self.screen.blit(self.walls_sheet[14],self.walls_rect)
+        
+       
     def ui(self):
         # Render
         self.screen.fill(BLACK)
 
         # Render 3d maze
-        self.screen.blit(self.maze_img, self.maze_rect)
+        self.renderWalls()
 
         # Render white background for mini map
         pygame.draw.rect(
@@ -406,7 +416,8 @@ class Game(pygame.sprite.Sprite):
     def checkUp(self):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
-        imageKey = [1, 1, 1, 1, 1, 1, 1, 1]
+        imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        
         # check left of player
         if pos[0] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1]] == 0:
@@ -449,13 +460,35 @@ class Game(pygame.sprite.Sprite):
         if pos[1] - 2 >= 0:
             if self.maze[pos[0]][pos[1] - 2] == 0:
                 imageKey[6] = 0
+
+        # check front-left + 2 of player
+        if pos[0] - 1 >= 0 and pos[1] - 3 >= 0:
+            if self.maze[pos[0] - 1][pos[1] - 3] == 0:
+                imageKey[8] = 0
+
+        # check front-right + 2 of player
+        if pos[0] + 1 < self.mazeWidth and pos[1] - 3 >= 0:
+            if self.maze[pos[0] + 1][pos[1] - 3] == 0:
+                imageKey[10] = 0
+
+        # check front + 2
+        if pos[1] - 3 >= 0:
+            if self.maze[pos[0]][pos[1] - 3] == 0:
+                imageKey[9] = 0
+                
+        # check front + 3
+        if pos[1] - 4 >= 0:
+            if self.maze[pos[0]][pos[1] - 4] == 0:
+                imageKey[11] = 0
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkDown(self):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
-        imageKey = [1, 1, 1, 1, 1, 1, 1, 1]
+        imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        
         # check left of player
         if pos[0] + 1 >= 0:
             if self.maze[pos[0] + 1][pos[1]] == 0:
@@ -465,6 +498,7 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 1 < self.mazeWidth:
             if self.maze[pos[0] - 1][pos[1]] == 0:
                 imageKey[1] = 0
+
 
         # check front-left of player
         if pos[0] + 1 >= 0 and pos[1] + 1 < self.mazeHeight:
@@ -498,12 +532,34 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 2 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 2] == 0:
                 imageKey[6] = 0
+    
+        # check front-left + 2 of player
+        if pos[0] + 1 >= 0 and pos[1] + 3 < self.mazeHeight:
+            if self.maze[pos[0] + 1][pos[1] + 3] == 0:
+                imageKey[8] = 0
+
+        # check front-right + 2 of player
+        if pos[0] - 1 < self.mazeWidth and pos[1] + 3 < self.mazeHeight:
+            if self.maze[pos[0] - 1][pos[1] + 3] == 0:
+                imageKey[10] = 0
+
+        # check front + 2
+        if pos[1] + 3 < self.mazeHeight:
+            if self.maze[pos[0]][pos[1] + 3] == 0:
+                imageKey[9] = 0
+        
+        # check front + 3
+        if pos[1] + 4 < self.mazeHeight:
+            if self.maze[pos[0]][pos[1] + 4] == 0:
+                imageKey[11] = 0
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkRight(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
-        imageKey = [1, 1, 1, 1, 1, 1, 1, 1]
+        imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -514,6 +570,7 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
 
+        
         # check front-left of player
         if pos[0] + 1 < self.mazeWidth and pos[1] - 1 >= 0:
             if self.maze[pos[0] + 1][pos[1] - 1] == 0:
@@ -546,12 +603,34 @@ class Game(pygame.sprite.Sprite):
         if pos[0] + 2 < self.mazeWidth:
             if self.maze[pos[0] + 2][pos[1]] == 0:
                 imageKey[6] = 0
+
+        # check front-left + 2 of player
+        if pos[0] + 3 < self.mazeWidth and pos[1] - 1 >= 0:
+            if self.maze[pos[0] + 3][pos[1] - 1] == 0:
+                imageKey[8] = 0
+
+        # check front-right + 2 of player
+        if pos[0] + 3 < self.mazeWidth and pos[1] + 1 < self.mazeHeight:
+            if self.maze[pos[0] + 3][pos[1] + 1] == 0:
+                imageKey[10] = 0
+
+        # check front + 2
+        if pos[0] + 3 < self.mazeWidth:
+            if self.maze[pos[0] + 3][pos[1]] == 0:
+                imageKey[9] = 0
+                
+        # check front + 3
+        if pos[0] + 4 < self.mazeWidth:
+            if self.maze[pos[0] + 4][pos[1]] == 0:
+                imageKey[11] = 0
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkLeft(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
-        imageKey = [1, 1, 1, 1, 1, 1, 1, 1]
+        imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+        
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -561,7 +640,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 1 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
-
+        
         # check front-left of player
         if pos[0] - 1 >= 0 and pos[1] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1] - 1] == 0:
@@ -594,6 +673,27 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 2 >= 0:
             if self.maze[pos[0] - 2][pos[1]] == 0:
                 imageKey[6] = 0
+
+        # check front-left + 2 of player
+        if pos[0] - 3 >= 0 and pos[1] - 1 >= 0:
+            if self.maze[pos[0] - 3][pos[1] - 1] == 0:
+                imageKey[8] = 0
+
+        # check front-right + 2 of player
+        if pos[0] - 3 >= 0 and pos[1] + 1 < self.mazeHeight:
+            if self.maze[pos[0] - 3][pos[1] + 1] == 0:
+                imageKey[10] = 0
+
+        # check front + 2
+        if pos[0] - 3 >= 0:
+            if self.maze[pos[0] - 3][pos[1]] == 0:
+                imageKey[9] = 0
+                
+        # check front + 3
+        if pos[0] - 4 >= 0:
+            if self.maze[pos[0] - 4][pos[1]] == 0:
+                imageKey[11] = 0
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
