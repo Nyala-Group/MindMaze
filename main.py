@@ -1,5 +1,22 @@
 import pygame
 import random
+import sys
+
+"""
+DEV NOTES
+
+Need to fill out the question files that are not test files.
+
+I am also considering adding extra space below the game screen to use exclusively for question space.
+    To do this, I would increase the HEIGHT constant above to probably 520.
+    - Lucas
+    
+Can we also figure out some way to make the player rely on the actual game screen more?
+    I find myself pretty much exclusively using the minimap to navigate.
+    Perhaps just removing the red endpoint marker would do it, but right now that helps with testing since there are no
+    in-game door visuals yet.
+    - Lucas
+"""
 
 pygame.init()
 pygame.display.set_caption("Mind Maze!")
@@ -22,9 +39,8 @@ DEFAULT_FONT = pygame.font.Font(pygame.font.get_default_font(), 15)
 questionsTotal = 0
 questionsRight = 0
 questionsAnswered = []
-QUESTION_FILES = [
-    "Q_A_test.txt",
-]
+QUESTION_FILES = ["Q_A_test.txt"]
+# QUESTION_FILES = ["Q_A_easy.txt", "Q_A_medium.txt", "Q_A_hard.txt"]
 for file in QUESTION_FILES:
     with open(file, "r") as qFile:
         lines = qFile.readlines()
@@ -419,9 +435,6 @@ class Game(pygame.sprite.Sprite):
         # Render mini map green arrow character
         self.screen.blit(self.arrow_img, self.arrow_rect)
 
-        self.clock.tick(60)
-        pygame.display.flip()
-
     # these last four functions give our character its line of sight checkUp(),checkDown(), checkRight(), checkLeft()
     def checkUp(self):
         # grab our current position
@@ -705,8 +718,7 @@ class Game(pygame.sprite.Sprite):
         # now we have built the correct image key for our character facing down
         return imageKey
 
-    def questionPrompt(self):
-        # Move the question selection thing to a one-time process in the space key detection and input the question and answer dict in here as args?
+    def choseQuestion(self):
         finishedSheet = True
         fileNum = 0
         while finishedSheet:
@@ -717,11 +729,14 @@ class Game(pygame.sprite.Sprite):
                 numQsInFile = len(lines) // 5
 
             for i in range(numQsInFile):
-                if (fileNum, (i + 1)) not in questionsAnswered:
+                if (fileNum, i) not in questionsAnswered:
                     finishedSheet = False
                     break
 
                 fileNum += 1
+                if fileNum == len(QUESTION_FILES):
+                    pygame.quit()
+                    sys.exit("YOU WIN")
 
         while True:
             chosenQuestion = random.randint(0, (numQsInFile - 1))
@@ -734,8 +749,8 @@ class Game(pygame.sprite.Sprite):
             lines = qFILE.readlines()
 
         qLine = chosenQuestion * 5
-        question = lines[qLine]
-        correctAnswer = lines[qLine + 1]
+        question = lines[qLine].strip()
+        correctAnswer = lines[qLine + 1].strip()
         possChars = [
             "a",
             "b",
@@ -755,45 +770,45 @@ class Game(pygame.sprite.Sprite):
             corrChar: correctAnswer,
         }
         for i in range(3):
-            answerChars[possChars[i]] = wrongAnswers[i]
+            answerChars[possChars[i]] = wrongAnswers[i].strip()
 
-        # Display question and answers - Perhaps in a pop-up?
+        return question, answerChars, corrChar
 
-        questionText = f"{question}a. {answerChars["a"]}b. {answerChars["b"]}c. {answerChars["c"]}d. {answerChars["d"]}"
+    def questionPrompt(self, question: str, answerChars: dict):
+        # Display question and answers
         qWidth, qHeight = DEFAULT_FONT.size(question)
-        qHeight *= 5
+        qHeight *= 6
         qBkgTopLeftY = 10
-        qBkgTopLeftX = (WIDTH // 2) - (qWidth // 2)
+        qBkgTopLeftX = 220
         qBkgRect = pygame.Rect(
             qBkgTopLeftX,
             qBkgTopLeftY,
             (qWidth + 20),
-            (qHeight + 20),
+            105,
         )
-        qText = DEFAULT_FONT.render(questionText, False, WHITE)
+        qText = DEFAULT_FONT.render(question, False, WHITE)
+        ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
+        ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
+        ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
+        ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
 
-        """
-        Need to finish this function.
-        Render the question background Rect in BLACK,
-        then render the question text on top of that in WHITE
-        Check for user key press of a, b, c, or d and correlate that with the correct character stored in corrChar
-        if right, return True
-        if wrong, return False
-        """
-        answered = False
-        return answered
-        # The following code is broken, completely freezes the game.
-        while not answered:
-            pygame.draw.rect(
-                self.screen,
-                BLACK,
-                qBkgRect,
-            )
-            self.screen.blit(qText, ((qBkgTopLeftX + 10), 20))
-            self.clock.tick()
+        pygame.draw.rect(
+            self.screen,
+            BLACK,
+            qBkgRect,
+        )
+        self.screen.blit(qText, ((qBkgTopLeftX + 10), 20))
+        self.screen.blit(ansA, ((qBkgTopLeftX + 10), 35))
+        self.screen.blit(ansB, ((qBkgTopLeftX + 10), 50))
+        self.screen.blit(ansC, ((qBkgTopLeftX + 10), 65))
+        self.screen.blit(ansD, ((qBkgTopLeftX + 10), 80))
 
 
 game = Game()
+questionActive = False
+question = None
+answerDict = None
+correctAnswer = None
 # Main game loop
 while True:
     for event in pygame.event.get():
@@ -801,13 +816,13 @@ while True:
             pygame.quit()
 
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_LEFT:
+            if event.key == pygame.K_LEFT and questionActive == False:
                 game.turnLeft()
 
-            if event.key == pygame.K_RIGHT:
+            if event.key == pygame.K_RIGHT and questionActive == False:
                 game.turnRight()
 
-            if event.key == pygame.K_UP:
+            if event.key == pygame.K_UP and questionActive == False:
                 # alternate image displayed for long hallways
                 game.toggleAltHallway = not game.toggleAltHallway
                 game.moveForward(game.dir)
@@ -818,21 +833,72 @@ while True:
                     game.arrow_rect.x // BLOCK_HEIGHT,
                 )
                 if pos == game.mazeEnd:
-                    # This is where questions will be presented, in a while loop.
-                    # questionAnswered = False
-                    # while not questionAnswered:
-                    # Present question
-                    # If True, break.
-                    # If False, continue.
+                    question, answerDict, correctAnswer = game.choseQuestion()
                     questionActive = True
 
             if event.key == pygame.K_q:
                 pygame.quit()
+                sys.exit()
 
             if event.key == pygame.K_z:
                 # Debug re-generate maze to quicken testing
                 game.mazeGenerate()
 
+            if event.key == pygame.K_a and questionActive == True:
+                # Check if letter chosen is the same as the correct answer.
+                # If it is, increase score, set questionActive to false, and generate a new maze
+                # If not, get a new question.
+                if correctAnswer == "a":
+                    questionsRight += 1
+                    game.scorePercent = (questionsRight / questionsTotal) * 100
+                    questionActive = False
+                    game.mazeGenerate()
+                else:
+                    question, answerDict, correctAnswer = game.choseQuestion()
+
+            if event.key == pygame.K_b and questionActive == True:
+                # Check if letter chosen is the same as the correct answer.
+                # If it is, increase score, set questionActive to false, and generate a new maze
+                # If not, get a new question.
+                if correctAnswer == "b":
+                    questionsRight += 1
+                    game.scorePercent = (questionsRight / questionsTotal) * 100
+                    questionActive = False
+                    game.mazeGenerate()
+                else:
+                    question, answerDict, correctAnswer = game.choseQuestion()
+
+            if event.key == pygame.K_c and questionActive == True:
+                # Check if letter chosen is the same as the correct answer.
+                # If it is, increase score, set questionActive to false, and generate a new maze
+                # If not, get a new question.
+                if correctAnswer == "c":
+                    questionsRight += 1
+                    game.scorePercent = (questionsRight / questionsTotal) * 100
+                    questionActive = False
+                    game.mazeGenerate()
+                else:
+                    question, answerDict, correctAnswer = game.choseQuestion()
+
+            if event.key == pygame.K_d and questionActive == True:
+                # Check if letter chosen is the same as the correct answer.
+                # If it is, increase score, set questionActive to false, and generate a new maze
+                # If not, get a new question.
+                if correctAnswer == "d":
+                    questionsRight += 1
+                    game.scorePercent = (questionsRight / questionsTotal) * 100
+                    questionActive = False
+                    game.mazeGenerate()
+                else:
+                    question, answerDict, correctAnswer = game.choseQuestion()
+
     game.play_step()
     if questionActive:
-        game.questionPrompt()
+        pos = (
+            game.arrow_rect.y // BLOCK_WIDTH,
+            game.arrow_rect.x // BLOCK_HEIGHT,
+        )
+        if pos == game.mazeEnd:
+            game.questionPrompt(question, answerDict)
+    game.clock.tick(60)
+    pygame.display.flip()
