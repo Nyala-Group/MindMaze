@@ -706,6 +706,7 @@ class Game(pygame.sprite.Sprite):
         return imageKey
 
     def questionPrompt(self):
+        # Move the question selection thing to a one-time process in the space key detection and input the question and answer dict in here as args?
         finishedSheet = True
         fileNum = 0
         while finishedSheet:
@@ -713,21 +714,21 @@ class Game(pygame.sprite.Sprite):
             numQsInFile = 0
             with open(qFile, "r") as qfile:
                 lines = qfile.readlines()
-                numQsInFile = len(lines) / 5
+                numQsInFile = len(lines) // 5
 
             for i in range(numQsInFile):
                 if (fileNum, (i + 1)) not in questionsAnswered:
                     finishedSheet = False
                     break
 
-            fileNum += 1
+                fileNum += 1
 
         while True:
-            chosenQuestion = random.randint(1, numQsInFile)
+            chosenQuestion = random.randint(0, (numQsInFile - 1))
             if (fileNum, chosenQuestion) not in questionsAnswered:
                 break
 
-        questionsAnswered.append(fileNum, chosenQuestion)
+        questionsAnswered.append((fileNum, chosenQuestion))
 
         with open(qFile, "r") as qFILE:
             lines = qFILE.readlines()
@@ -758,16 +759,18 @@ class Game(pygame.sprite.Sprite):
 
         # Display question and answers - Perhaps in a pop-up?
 
-        questionText = f"{question}\na. {answerChars["a"]}\nb. {answerChars["b"]}\nc. {answerChars["c"]}\nd. {answerChars["d"]}"
-        qWidth, qHeight = DEFAULT_FONT.size(questionText)
+        questionText = f"{question}a. {answerChars["a"]}b. {answerChars["b"]}c. {answerChars["c"]}d. {answerChars["d"]}"
+        qWidth, qHeight = DEFAULT_FONT.size(question)
+        qHeight *= 5
         qBkgTopLeftY = 10
-        qBkgTopLeftX = 220
+        qBkgTopLeftX = (WIDTH // 2) - (qWidth // 2)
         qBkgRect = pygame.Rect(
             qBkgTopLeftX,
             qBkgTopLeftY,
             (qWidth + 20),
             (qHeight + 20),
         )
+        qText = DEFAULT_FONT.render(questionText, False, WHITE)
 
         """
         Need to finish this function.
@@ -777,6 +780,17 @@ class Game(pygame.sprite.Sprite):
         if right, return True
         if wrong, return False
         """
+        answered = False
+        return answered
+        # The following code is broken, completely freezes the game.
+        while not answered:
+            pygame.draw.rect(
+                self.screen,
+                BLACK,
+                qBkgRect,
+            )
+            self.screen.blit(qText, ((qBkgTopLeftX + 10), 20))
+            self.clock.tick()
 
 
 game = Game()
@@ -810,9 +824,15 @@ while True:
                     # Present question
                     # If True, break.
                     # If False, continue.
-                    game.mazeGenerate()
+                    questionActive = True
 
             if event.key == pygame.K_q:
                 pygame.quit()
 
+            if event.key == pygame.K_z:
+                # Debug re-generate maze to quicken testing
+                game.mazeGenerate()
+
     game.play_step()
+    if questionActive:
+        game.questionPrompt()
