@@ -23,7 +23,7 @@ pygame.display.set_caption("Mind Maze!")
 
 # Constants
 WIDTH = 610
-HEIGHT = 400
+HEIGHT = 520
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (100, 180, 0)
@@ -39,8 +39,8 @@ DEFAULT_FONT = pygame.font.Font(pygame.font.get_default_font(), 15)
 questionsTotal = 0
 questionsRight = 0
 questionsAnswered = []
-QUESTION_FILES = ["Q_A_test.txt"]
-# QUESTION_FILES = ["Q_A_easy.txt", "Q_A_medium.txt", "Q_A_hard.txt"]
+# QUESTION_FILES = ["Q_A_test.txt"]
+QUESTION_FILES = ["Q_A_easy.txt", "Q_A_medium.txt", "Q_A_hard.txt"]
 for file in QUESTION_FILES:
     with open(file, "r") as qFile:
         lines = qFile.readlines()
@@ -146,6 +146,17 @@ class Maze:
             self.end = dead_ends[random.randint(-((len(dead_ends) // 4)), -1)]
         else:
             self.end = (self.size * 2 - 1, self.size * 2 - 1)
+
+        # Choose 5 random walls in the maze and make them paths.
+        total = 5 + random.randint(0, self.size)
+        count = 0
+        while count < total:
+            randColumn = random.randint(1, (self.size * 2 - 2))
+            randRow = random.randint(1, (self.size * 2 - 2))
+            if self.grid[randColumn][randRow] == 1:
+                count += 1
+                self.grid[randColumn][randRow] = 0
+
         return self.grid, self.end
 
 
@@ -330,66 +341,65 @@ class Game(pygame.sprite.Sprite):
     # needs to be optimized right now renders some unseen walls but works for player
     def renderWalls(self):
         # always render background roof and floor
-        self.screen.blit(self.walls_sheet[0],self.walls_rect)
-        
+        self.screen.blit(self.walls_sheet[0], self.walls_rect)
+
         # row 4 ---------------------------------------------------------------
         # render wall infront of player
-        if(self.wallView[11] == '1'):
-            self.screen.blit(self.walls_sheet[18],self.walls_rect)
-            
+        if self.wallView[11] == "1":
+            self.screen.blit(self.walls_sheet[18], self.walls_rect)
+
         # row 3 ---------------------------------------------------------------
         # wall to player front left+2
-        if(self.wallView[8] == '1'):
+        if self.wallView[8] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[2],self.walls_rect)
-            self.screen.blit(self.walls_sheet[4],self.walls_rect)
+            self.screen.blit(self.walls_sheet[2], self.walls_rect)
+            self.screen.blit(self.walls_sheet[4], self.walls_rect)
         # wall to player front right+2
-        if(self.wallView[10] == '1'):
+        if self.wallView[10] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[1],self.walls_rect)
-            self.screen.blit(self.walls_sheet[5],self.walls_rect)
+            self.screen.blit(self.walls_sheet[1], self.walls_rect)
+            self.screen.blit(self.walls_sheet[5], self.walls_rect)
         # render wall infront of player
-        if(self.wallView[9] == '1'):
-            self.screen.blit(self.walls_sheet[3],self.walls_rect)
-        
+        if self.wallView[9] == "1":
+            self.screen.blit(self.walls_sheet[3], self.walls_rect)
+
         # row 2 ---------------------------------------------------------------
         # wall to player front left+1
-        if(self.wallView[5] == '1'):
+        if self.wallView[5] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[6],self.walls_rect)
-            self.screen.blit(self.walls_sheet[8],self.walls_rect)
+            self.screen.blit(self.walls_sheet[6], self.walls_rect)
+            self.screen.blit(self.walls_sheet[8], self.walls_rect)
         # wall to player front right+1
-        if(self.wallView[7] == '1'):
+        if self.wallView[7] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[7],self.walls_rect)
-            self.screen.blit(self.walls_sheet[9],self.walls_rect)
+            self.screen.blit(self.walls_sheet[7], self.walls_rect)
+            self.screen.blit(self.walls_sheet[9], self.walls_rect)
         # render wall infront of player
-        if(self.wallView[6] == '1'):
-            self.screen.blit(self.walls_sheet[12],self.walls_rect)
-            
+        if self.wallView[6] == "1":
+            self.screen.blit(self.walls_sheet[12], self.walls_rect)
+
         # row 1 in front of player --------------------------------------------
         # wall to player front left
-        if(self.wallView[2] == '1'):
+        if self.wallView[2] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[10],self.walls_rect)
-            self.screen.blit(self.walls_sheet[16],self.walls_rect)
+            self.screen.blit(self.walls_sheet[10], self.walls_rect)
+            self.screen.blit(self.walls_sheet[16], self.walls_rect)
         # wall to player front right
-        if(self.wallView[4] == '1'):
+        if self.wallView[4] == "1":
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[11],self.walls_rect)
-            self.screen.blit(self.walls_sheet[17],self.walls_rect)
+            self.screen.blit(self.walls_sheet[11], self.walls_rect)
+            self.screen.blit(self.walls_sheet[17], self.walls_rect)
         # render wall directly infront of player
-        if(self.wallView[3] == '1'):
-            self.screen.blit(self.walls_sheet[13],self.walls_rect)
-            
-            
+        if self.wallView[3] == "1":
+            self.screen.blit(self.walls_sheet[13], self.walls_rect)
+
         # row 0 containging player --------------------------------------------
         # render wall to your left peripheral
-        if(self.wallView[0] == '1'):
-            self.screen.blit(self.walls_sheet[15],self.walls_rect)
+        if self.wallView[0] == "1":
+            self.screen.blit(self.walls_sheet[15], self.walls_rect)
         # render wall to your right peripheral
-        if(self.wallView[1] == '1'):
-            self.screen.blit(self.walls_sheet[14],self.walls_rect)
+        if self.wallView[1] == "1":
+            self.screen.blit(self.walls_sheet[14], self.walls_rect)
 
     def ui(self):
         # Render
@@ -441,7 +451,7 @@ class Game(pygame.sprite.Sprite):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        
+
         # check left of player
         if pos[0] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1]] == 0:
@@ -466,7 +476,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
                 imageKey[3] = 0
-            
+
         # check front-left + 1 of player
         if pos[0] - 1 >= 0 and pos[1] - 2 >= 0:
             if self.maze[pos[0] - 1][pos[1] - 2] == 0:
@@ -496,12 +506,12 @@ class Game(pygame.sprite.Sprite):
         if pos[1] - 3 >= 0:
             if self.maze[pos[0]][pos[1] - 3] == 0:
                 imageKey[9] = 0
-                
+
         # check front + 3
         if pos[1] - 4 >= 0:
             if self.maze[pos[0]][pos[1] - 4] == 0:
                 imageKey[11] = 0
-                
+
         # now we have built the correct image key for our character facing down
         return imageKey
 
@@ -509,7 +519,7 @@ class Game(pygame.sprite.Sprite):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        
+
         # check left of player
         if pos[0] + 1 >= 0:
             if self.maze[pos[0] + 1][pos[1]] == 0:
@@ -519,7 +529,6 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 1 < self.mazeWidth:
             if self.maze[pos[0] - 1][pos[1]] == 0:
                 imageKey[1] = 0
-
 
         # check front-left of player
         if pos[0] + 1 >= 0 and pos[1] + 1 < self.mazeHeight:
@@ -535,7 +544,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 1 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[3] = 0
-           
+
         # check front-left + 1 of player
         if pos[0] + 1 >= 0 and pos[1] + 2 < self.mazeHeight:
             if self.maze[pos[0] + 1][pos[1] + 2] == 0:
@@ -550,7 +559,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 2 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 2] == 0:
                 imageKey[6] = 0
-    
+
         # check front-left + 2 of player
         if pos[0] + 1 >= 0 and pos[1] + 3 < self.mazeHeight:
             if self.maze[pos[0] + 1][pos[1] + 3] == 0:
@@ -565,19 +574,19 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 3 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 3] == 0:
                 imageKey[9] = 0
-        
+
         # check front + 3
         if pos[1] + 4 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 4] == 0:
                 imageKey[11] = 0
-                
+
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkRight(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        
+
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -588,7 +597,6 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
 
-        
         # check front-left of player
         if pos[0] + 1 < self.mazeWidth and pos[1] - 1 >= 0:
             if self.maze[pos[0] + 1][pos[1] - 1] == 0:
@@ -633,19 +641,19 @@ class Game(pygame.sprite.Sprite):
         if pos[0] + 3 < self.mazeWidth:
             if self.maze[pos[0] + 3][pos[1]] == 0:
                 imageKey[9] = 0
-                
+
         # check front + 3
         if pos[0] + 4 < self.mazeWidth:
             if self.maze[pos[0] + 4][pos[1]] == 0:
                 imageKey[11] = 0
-                
+
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkLeft(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-        
+
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -655,7 +663,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 1 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
-        
+
         # check front-left of player
         if pos[0] - 1 >= 0 and pos[1] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1] - 1] == 0:
@@ -700,12 +708,12 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 3 >= 0:
             if self.maze[pos[0] - 3][pos[1]] == 0:
                 imageKey[9] = 0
-                
+
         # check front + 3
         if pos[0] - 4 >= 0:
             if self.maze[pos[0] - 4][pos[1]] == 0:
                 imageKey[11] = 0
-                
+
         # now we have built the correct image key for our character facing down
         return imageKey
 
@@ -767,32 +775,57 @@ class Game(pygame.sprite.Sprite):
 
     def questionPrompt(self, question: str, answerChars: dict):
         # Display question and answers
-        qWidth, qHeight = DEFAULT_FONT.size(question)
-        qHeight *= 6
-        qBkgTopLeftY = 10
-        qBkgTopLeftX = 220
+        qBkgTopLeftY = 400
+        qBkgTopLeftX = 10
         qBkgRect = pygame.Rect(
             qBkgTopLeftX,
             qBkgTopLeftY,
-            (qWidth + 20),
+            590,
             105,
         )
-        qText = DEFAULT_FONT.render(question, False, WHITE)
-        ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
-        ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
-        ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
-        ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
-
         pygame.draw.rect(
             self.screen,
-            BLACK,
+            DARK_WHITE,
             qBkgRect,
         )
-        self.screen.blit(qText, ((qBkgTopLeftX + 10), 20))
-        self.screen.blit(ansA, ((qBkgTopLeftX + 10), 35))
-        self.screen.blit(ansB, ((qBkgTopLeftX + 10), 50))
-        self.screen.blit(ansC, ((qBkgTopLeftX + 10), 65))
-        self.screen.blit(ansD, ((qBkgTopLeftX + 10), 80))
+        qWidth, qHeight = DEFAULT_FONT.size(question)
+        if qWidth > 570:
+            qWords = question.split(" ")
+            maxLen = 0
+            for i in range(len(qWords)):
+                testWidth, testHeight = DEFAULT_FONT.size(" ".join(qWords[:i]))
+                if testWidth >= 570:
+                    maxLen = i - 1
+                    break
+
+            firstLine = " ".join(qWords[:maxLen])
+            secondLine = " ".join(qWords[(maxLen + 1) :])
+            qText1 = DEFAULT_FONT.render(firstLine, False, WHITE)
+            qText2 = DEFAULT_FONT.render(secondLine, False, WHITE)
+            ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
+            ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
+            ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
+            ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
+
+            self.screen.blit(qText1, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
+            self.screen.blit(qText2, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 25)))
+            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 40)))
+            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 55)))
+            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
+            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 85)))
+
+        else:
+            qText = DEFAULT_FONT.render(question, False, WHITE)
+            ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
+            ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
+            ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
+            ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
+
+            self.screen.blit(qText, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
+            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 25)))
+            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 40)))
+            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 55)))
+            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
 
 
 game = Game()
