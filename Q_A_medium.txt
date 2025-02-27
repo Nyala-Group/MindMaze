@@ -1,0 +1,50 @@
+q. You have to implement a Stack using two queues. Which statement about O-time is true?
+O(1) for push, O(n) for pop
+O(1) for push, O(1) for pop
+O(n) for push, O(1) for pop
+O(n) for push, O(n) for pop
+q. What is the result of the following Bitwise operation? 0101 1010 XNOR 1101 0010
+0111 0111
+0101 0010
+1010 1101
+1000 1000
+q. What is the term for a group of Four binary digits?
+Byte
+Bite
+Chunk
+Nibble
+q. What is the hexadecimal representation of the following binary number? 0001 0010 1010
+12A
+019
+2A5
+AE2
+q. What is the 7-bit binary representation of the ASCII character *?
+010 1010
+011 1000
+010 0110
+011 1101
+q. Which of the following is the correct value represented by a binary Kilo?
+1024
+1000
+2000
+1002
+q. Which of the following powers of two is represented by the Tera prefix, as in Terabytes?
+2^40
+2^30
+2^60
+2^12
+q. Which of the following 8-bit binary integers is the correct Two's Complement representation of -21?
+1110 1011
+0001 0101
+1110 1010
+1000 1011
+q. What is the acronym used for the computer part that performs mathematical operations?
+ALU
+CPU
+GPU
+MAC
+q. Which Python library allows a program to accept command-line arguments?
+sys
+os
+math
+time

@@ -1,0 +1,50 @@
+q. What is the result of the following operation in Python? 10 % 3
+1
+3
+7
+9
+q. Which data structure follows the Last in First out principle?
+Stack
+Queue
+Deque
+Array
+q. What does the following Python code output? print("Hello"[1])
+e
+H
+o
+l
+q. What is the name of the error raised when dividing by zero in Python?
+ZeroDivisionError
+DivideByZeroError
+TypeError
+IntegerError
+q. Which of the following symbols is used in single-line comments in Python?
+#
+//
+--
+'
+q. Which logical operator evaluates to True only when both operands are True?
+AND
+XOR
+NAND
+XNOR
+q. Which data stucture allows for insertion and removal on both ends, but not in the middle?
+Deque
+Queue
+Heap
+List
+q. What is the name of the process where souce code is converted to machine code?
+Compilation
+Conversion
+Assembly
+Allocation
+q. What type of loop executes at least once before checking the loop condition?
+Do-While
+While
+Do-Until
+For
+q. What is the result of the following operation in Python? 2**3
+8
+6
+18
+12
