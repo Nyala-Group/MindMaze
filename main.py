@@ -330,65 +330,66 @@ class Game(pygame.sprite.Sprite):
     # needs to be optimized right now renders some unseen walls but works for player
     def renderWalls(self):
         # always render background roof and floor
-        self.screen.blit(self.walls_sheet[0], self.walls_rect)
-
+        self.screen.blit(self.walls_sheet[0],self.walls_rect)
+        
         # row 4 ---------------------------------------------------------------
         # render wall infront of player
-        if self.wallView[11] == "1":
-            self.screen.blit(self.walls_sheet[18], self.walls_rect)
-
+        if(self.wallView[11] == '1'):
+            self.screen.blit(self.walls_sheet[18],self.walls_rect)
+            
         # row 3 ---------------------------------------------------------------
         # wall to player front left+2
-        if self.wallView[8] == "1":
+        if(self.wallView[8] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[1], self.walls_rect)
-            self.screen.blit(self.walls_sheet[4], self.walls_rect)
+            self.screen.blit(self.walls_sheet[2],self.walls_rect)
+            self.screen.blit(self.walls_sheet[4],self.walls_rect)
         # wall to player front right+2
-        if self.wallView[10] == "1":
+        if(self.wallView[10] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[2], self.walls_rect)
-            self.screen.blit(self.walls_sheet[5], self.walls_rect)
+            self.screen.blit(self.walls_sheet[1],self.walls_rect)
+            self.screen.blit(self.walls_sheet[5],self.walls_rect)
         # render wall infront of player
-        if self.wallView[9] == "1":
-            self.screen.blit(self.walls_sheet[3], self.walls_rect)
-
+        if(self.wallView[9] == '1'):
+            self.screen.blit(self.walls_sheet[3],self.walls_rect)
+        
         # row 2 ---------------------------------------------------------------
         # wall to player front left+1
-        if self.wallView[5] == "1":
+        if(self.wallView[5] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[7], self.walls_rect)
-            self.screen.blit(self.walls_sheet[9], self.walls_rect)
+            self.screen.blit(self.walls_sheet[6],self.walls_rect)
+            self.screen.blit(self.walls_sheet[8],self.walls_rect)
         # wall to player front right+1
-        if self.wallView[7] == "1":
+        if(self.wallView[7] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[8], self.walls_rect)
-            self.screen.blit(self.walls_sheet[10], self.walls_rect)
+            self.screen.blit(self.walls_sheet[7],self.walls_rect)
+            self.screen.blit(self.walls_sheet[9],self.walls_rect)
         # render wall infront of player
-        if self.wallView[6] == "1":
-            self.screen.blit(self.walls_sheet[12], self.walls_rect)
-
+        if(self.wallView[6] == '1'):
+            self.screen.blit(self.walls_sheet[12],self.walls_rect)
+            
         # row 1 in front of player --------------------------------------------
         # wall to player front left
-        if self.wallView[2] == "1":
+        if(self.wallView[2] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[10], self.walls_rect)
-            self.screen.blit(self.walls_sheet[16], self.walls_rect)
+            self.screen.blit(self.walls_sheet[10],self.walls_rect)
+            self.screen.blit(self.walls_sheet[16],self.walls_rect)
         # wall to player front right
-        if self.wallView[4] == "1":
+        if(self.wallView[4] == '1'):
             # render its front face and side face
-            self.screen.blit(self.walls_sheet[11], self.walls_rect)
-            self.screen.blit(self.walls_sheet[17], self.walls_rect)
+            self.screen.blit(self.walls_sheet[11],self.walls_rect)
+            self.screen.blit(self.walls_sheet[17],self.walls_rect)
         # render wall directly infront of player
-        if self.wallView[3] == "1":
-            self.screen.blit(self.walls_sheet[13], self.walls_rect)
-
+        if(self.wallView[3] == '1'):
+            self.screen.blit(self.walls_sheet[13],self.walls_rect)
+            
+            
         # row 0 containging player --------------------------------------------
         # render wall to your left peripheral
-        if self.wallView[0] == "1":
-            self.screen.blit(self.walls_sheet[15], self.walls_rect)
+        if(self.wallView[0] == '1'):
+            self.screen.blit(self.walls_sheet[15],self.walls_rect)
         # render wall to your right peripheral
-        if self.wallView[1] == "1":
-            self.screen.blit(self.walls_sheet[14], self.walls_rect)
+        if(self.wallView[1] == '1'):
+            self.screen.blit(self.walls_sheet[14],self.walls_rect)
 
     def ui(self):
         # Render
@@ -440,7 +441,7 @@ class Game(pygame.sprite.Sprite):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-
+        
         # check left of player
         if pos[0] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1]] == 0:
@@ -465,10 +466,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
                 imageKey[3] = 0
-            else:
-                # if our path is blocked the rest should remain as 1's
-                return imageKey
-
+            
         # check front-left + 1 of player
         if pos[0] - 1 >= 0 and pos[1] - 2 >= 0:
             if self.maze[pos[0] - 1][pos[1] - 2] == 0:
@@ -498,12 +496,12 @@ class Game(pygame.sprite.Sprite):
         if pos[1] - 3 >= 0:
             if self.maze[pos[0]][pos[1] - 3] == 0:
                 imageKey[9] = 0
-
+                
         # check front + 3
         if pos[1] - 4 >= 0:
             if self.maze[pos[0]][pos[1] - 4] == 0:
                 imageKey[11] = 0
-
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
@@ -511,7 +509,7 @@ class Game(pygame.sprite.Sprite):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-
+        
         # check left of player
         if pos[0] + 1 >= 0:
             if self.maze[pos[0] + 1][pos[1]] == 0:
@@ -521,6 +519,7 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 1 < self.mazeWidth:
             if self.maze[pos[0] - 1][pos[1]] == 0:
                 imageKey[1] = 0
+
 
         # check front-left of player
         if pos[0] + 1 >= 0 and pos[1] + 1 < self.mazeHeight:
@@ -536,10 +535,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 1 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[3] = 0
-            else:
-                # if our path is blocked the rest should remain as 1's
-                return imageKey
-
+           
         # check front-left + 1 of player
         if pos[0] + 1 >= 0 and pos[1] + 2 < self.mazeHeight:
             if self.maze[pos[0] + 1][pos[1] + 2] == 0:
@@ -554,7 +550,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 2 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 2] == 0:
                 imageKey[6] = 0
-
+    
         # check front-left + 2 of player
         if pos[0] + 1 >= 0 and pos[1] + 3 < self.mazeHeight:
             if self.maze[pos[0] + 1][pos[1] + 3] == 0:
@@ -569,19 +565,19 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 3 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 3] == 0:
                 imageKey[9] = 0
-
+        
         # check front + 3
         if pos[1] + 4 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 4] == 0:
                 imageKey[11] = 0
-
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkRight(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-
+        
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -592,6 +588,7 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
 
+        
         # check front-left of player
         if pos[0] + 1 < self.mazeWidth and pos[1] - 1 >= 0:
             if self.maze[pos[0] + 1][pos[1] - 1] == 0:
@@ -606,9 +603,6 @@ class Game(pygame.sprite.Sprite):
         if pos[0] + 1 < self.mazeWidth:
             if self.maze[pos[0] + 1][pos[1]] == 0:
                 imageKey[3] = 0
-            else:
-                # if our path is blocked the rest should remain as 1's
-                return imageKey
 
         # check front-left + 1 of player
         if pos[0] + 2 < self.mazeWidth and pos[1] - 1 >= 0:
@@ -639,19 +633,19 @@ class Game(pygame.sprite.Sprite):
         if pos[0] + 3 < self.mazeWidth:
             if self.maze[pos[0] + 3][pos[1]] == 0:
                 imageKey[9] = 0
-
+                
         # check front + 3
         if pos[0] + 4 < self.mazeWidth:
             if self.maze[pos[0] + 4][pos[1]] == 0:
                 imageKey[11] = 0
-
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
     def checkLeft(self):
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
-
+        
         # check left of player
         if pos[1] - 1 >= 0:
             if self.maze[pos[0]][pos[1] - 1] == 0:
@@ -661,7 +655,7 @@ class Game(pygame.sprite.Sprite):
         if pos[1] + 1 < self.mazeHeight:
             if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[1] = 0
-
+        
         # check front-left of player
         if pos[0] - 1 >= 0 and pos[1] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1] - 1] == 0:
@@ -676,9 +670,6 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 1 >= 0:
             if self.maze[pos[0] - 1][pos[1]] == 0:
                 imageKey[3] = 0
-            else:
-                # if our path is blocked the rest should remain as 1's
-                return imageKey
 
         # check front-left + 1 of player
         if pos[0] - 2 >= 0 and pos[1] - 1 >= 0:
@@ -709,12 +700,12 @@ class Game(pygame.sprite.Sprite):
         if pos[0] - 3 >= 0:
             if self.maze[pos[0] - 3][pos[1]] == 0:
                 imageKey[9] = 0
-
+                
         # check front + 3
         if pos[0] - 4 >= 0:
             if self.maze[pos[0] - 4][pos[1]] == 0:
                 imageKey[11] = 0
-
+                
         # now we have built the correct image key for our character facing down
         return imageKey
 
