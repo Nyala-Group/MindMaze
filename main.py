@@ -6,10 +6,6 @@ import sys
 DEV NOTES
 
 Need to fill out the question files that are not test files.
-
-I am also considering adding extra space below the game screen to use exclusively for question space.
-    To do this, I would increase the HEIGHT constant above to probably 520.
-    - Lucas
     
 Can we also figure out some way to make the player rely on the actual game screen more?
     I find myself pretty much exclusively using the minimap to navigate.
@@ -22,8 +18,11 @@ pygame.init()
 pygame.display.set_caption("Mind Maze!")
 
 # Constants
-WIDTH = 610
-HEIGHT = 520
+MAZE_SIZE = 15
+MINIMAP_SIZE = (2 * MAZE_SIZE + 1) * 10
+
+WIDTH = max((400 + MINIMAP_SIZE), 610)
+HEIGHT = max(515, (MINIMAP_SIZE + 115))
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (100, 180, 0)
@@ -141,16 +140,33 @@ class Maze:
             else:
                 self.stack.pop()
 
-        # Choose 5 random walls in the maze and make them paths.
-        total = 5 + random.randint(0, self.size)
+        # Choose a couple of random walls in the maze and make them paths.
+        totalWalls = 0
+        for y in range(self.size * 2 + 1):
+            for x in range(self.size * 2 + 1):
+                totalWalls += self.grid[y][x]
+
+        total = random.randint(int(0.06 * totalWalls), int(0.12 * totalWalls))
         count = 0
         while count < total:
             randColumn = random.randint(1, (self.size * 2 - 2))
             randRow = random.randint(1, (self.size * 2 - 2))
-            if self.grid[randColumn][randRow] == 1:
+            # Check if 3 or more neighbors are walls. If so, skip.
+            nTot = sum(
+                1
+                for dx, dy in [(0, 1), (1, 0), (0, -1), (-1, 0)]
+                if self.grid[randColumn + dy][randRow + dx] == 1
+            )
+            if self.grid[randColumn][randRow] == 1 and nTot < 3:
                 count += 1
                 self.grid[randColumn][randRow] = 0
 
+        totalWalls = 0
+        for y in range(self.size * 2 + 1):
+            for x in range(self.size * 2 + 1):
+                totalWalls += self.grid[y][x]
+
+        print(f"Walls: {totalWalls}")
         # Enumerate all dead ends in the maze and chose one as the end point of the maze.
         dead_ends = self.find_dead_ends()
         if dead_ends:
@@ -181,7 +197,7 @@ class Game(pygame.sprite.Sprite):
         self.walls_sheet = walls_sheet.make_sprite_array(0, 0, 194, 194, 19, 19, 2)
         self.walls_img = self.walls_sheet[0]
         self.walls_rect = self.walls_img.get_rect()
-        self.walls_rect.x = 210
+        self.walls_rect.x = max(210, MINIMAP_SIZE)
         self.walls_rect.y = 0
 
         self.toggleAltHallway = True
@@ -195,7 +211,10 @@ class Game(pygame.sprite.Sprite):
 
         self.wallView = "111011010000"
 
-        newMaze = Maze(10)
+        # Larger mazes are possible. I just did a quick test to see how fast mazes of size 16 load, and they load just the same as size 10.
+        self.mazeSize = MAZE_SIZE
+
+        newMaze = Maze(self.mazeSize)
         self.maze, self.mazeEnd = newMaze.generate()
 
         self.mazeHeight = len(self.maze)
@@ -203,7 +222,7 @@ class Game(pygame.sprite.Sprite):
 
         self.buildWalls(self.maze)
 
-        # possition mini map in the top left of screen
+        # position mini map in the top left of screen
         self.miniMapBG = (
             0,
             0,
@@ -214,7 +233,7 @@ class Game(pygame.sprite.Sprite):
     def mazeGenerate(self):
         self.mazeLevel += 1
         self.dir = [-1, 0]
-        newMaze = Maze(10)
+        newMaze = Maze(self.mazeSize)
         self.maze, self.mazeEnd = newMaze.generate()
         self.walls = []
         self.buildWalls(self.maze)
@@ -436,13 +455,13 @@ class Game(pygame.sprite.Sprite):
 
         # Render text to show level
         levelText = DEFAULT_FONT.render(f"Level: {self.mazeLevel}", False, WHITE)
-        self.screen.blit(levelText, (10, 210))
+        self.screen.blit(levelText, (10, MINIMAP_SIZE))
 
         # Render text to show score
         scoreText = DEFAULT_FONT.render(
             f"Score: {self.scorePercent:.2f}%", False, WHITE
         )
-        self.screen.blit(scoreText, (10, 235))
+        self.screen.blit(scoreText, (10, (MINIMAP_SIZE + 25)))
 
         # Render mini map green arrow character
         self.screen.blit(self.arrow_img, self.arrow_rect)
@@ -776,12 +795,12 @@ class Game(pygame.sprite.Sprite):
 
     def questionPrompt(self, question: str, answerChars: dict):
         # Display question and answers
-        qBkgTopLeftY = 400
+        qBkgTopLeftY = max(400, MINIMAP_SIZE)
         qBkgTopLeftX = 10
         qBkgRect = pygame.Rect(
             qBkgTopLeftX,
             qBkgTopLeftY,
-            590,
+            (WIDTH - 20),
             105,
         )
         pygame.draw.rect(
@@ -790,12 +809,12 @@ class Game(pygame.sprite.Sprite):
             qBkgRect,
         )
         qWidth, qHeight = DEFAULT_FONT.size(question)
-        if qWidth > 570:
+        if qWidth > (WIDTH - 40):
             qWords = question.split(" ")
             maxLen = 0
             for i in range(len(qWords)):
                 testWidth, testHeight = DEFAULT_FONT.size(" ".join(qWords[:i]))
-                if testWidth >= 570:
+                if testWidth >= (WIDTH - 40):
                     maxLen = i - 1
                     break
 
