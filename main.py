@@ -141,12 +141,6 @@ class Maze:
             else:
                 self.stack.pop()
 
-        dead_ends = self.find_dead_ends()
-        if dead_ends:
-            self.end = dead_ends[random.randint(-((len(dead_ends) // 4)), -1)]
-        else:
-            self.end = (self.size * 2 - 1, self.size * 2 - 1)
-
         # Choose 5 random walls in the maze and make them paths.
         total = 5 + random.randint(0, self.size)
         count = 0
@@ -156,6 +150,13 @@ class Maze:
             if self.grid[randColumn][randRow] == 1:
                 count += 1
                 self.grid[randColumn][randRow] = 0
+
+        # Enumerate all dead ends in the maze and chose one as the end point of the maze.
+        dead_ends = self.find_dead_ends()
+        if dead_ends:
+            self.end = dead_ends[random.randint(-((len(dead_ends) // 4)), -1)]
+        else:
+            self.end = (self.size * 2 - 1, self.size * 2 - 1)
 
         return self.grid, self.end
 
@@ -512,7 +513,7 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0]][pos[1] - 4] == 0:
                 imageKey[11] = 0
 
-        # now we have built the correct image key for our character facing down
+        # now we have built the correct image key for our character facing up
         return imageKey
 
     def checkDown(self):
@@ -647,7 +648,7 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0] + 4][pos[1]] == 0:
                 imageKey[11] = 0
 
-        # now we have built the correct image key for our character facing down
+        # now we have built the correct image key for our character facing right
         return imageKey
 
     def checkLeft(self):
@@ -655,23 +656,23 @@ class Game(pygame.sprite.Sprite):
         imageKey = [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
 
         # check left of player
-        if pos[1] - 1 >= 0:
-            if self.maze[pos[0]][pos[1] - 1] == 0:
+        if pos[1] + 1 >= 0:
+            if self.maze[pos[0]][pos[1] + 1] == 0:
                 imageKey[0] = 0
 
         # check right of player
-        if pos[1] + 1 < self.mazeHeight:
-            if self.maze[pos[0]][pos[1] + 1] == 0:
+        if pos[1] - 1 < self.mazeHeight:
+            if self.maze[pos[0]][pos[1] - 1] == 0:
                 imageKey[1] = 0
 
         # check front-left of player
-        if pos[0] - 1 >= 0 and pos[1] - 1 >= 0:
-            if self.maze[pos[0] - 1][pos[1] - 1] == 0:
+        if pos[0] - 1 >= 0 and pos[1] + 1 >= 0:
+            if self.maze[pos[0] - 1][pos[1] + 1] == 0:
                 imageKey[2] = 0
 
         # check front-right of player
-        if pos[0] - 1 >= 0 and pos[1] + 1 < self.mazeHeight:
-            if self.maze[pos[0] - 1][pos[1] + 1] == 0:
+        if pos[0] - 1 >= 0 and pos[1] - 1 < self.mazeHeight:
+            if self.maze[pos[0] - 1][pos[1] - 1] == 0:
                 imageKey[4] = 0
 
         # check front of player if wall the rest of indexes are 1's
@@ -680,13 +681,13 @@ class Game(pygame.sprite.Sprite):
                 imageKey[3] = 0
 
         # check front-left + 1 of player
-        if pos[0] - 2 >= 0 and pos[1] - 1 >= 0:
-            if self.maze[pos[0] - 2][pos[1] - 1] == 0:
+        if pos[0] - 2 >= 0 and pos[1] + 1 >= 0:
+            if self.maze[pos[0] - 2][pos[1] + 1] == 0:
                 imageKey[5] = 0
 
         # check front-right + 1 of player
-        if pos[0] - 2 >= 0 and pos[1] + 1 < self.mazeHeight:
-            if self.maze[pos[0] - 2][pos[1] + 1] == 0:
+        if pos[0] - 2 >= 0 and pos[1] - 1 < self.mazeHeight:
+            if self.maze[pos[0] - 2][pos[1] - 1] == 0:
                 imageKey[7] = 0
 
         # check front + 1
@@ -695,13 +696,13 @@ class Game(pygame.sprite.Sprite):
                 imageKey[6] = 0
 
         # check front-left + 2 of player
-        if pos[0] - 3 >= 0 and pos[1] - 1 >= 0:
-            if self.maze[pos[0] - 3][pos[1] - 1] == 0:
+        if pos[0] - 3 >= 0 and pos[1] + 1 >= 0:
+            if self.maze[pos[0] - 3][pos[1] + 1] == 0:
                 imageKey[8] = 0
 
         # check front-right + 2 of player
-        if pos[0] - 3 >= 0 and pos[1] + 1 < self.mazeHeight:
-            if self.maze[pos[0] - 3][pos[1] + 1] == 0:
+        if pos[0] - 3 >= 0 and pos[1] - 1 < self.mazeHeight:
+            if self.maze[pos[0] - 3][pos[1] - 1] == 0:
                 imageKey[10] = 0
 
         # check front + 2
@@ -714,7 +715,7 @@ class Game(pygame.sprite.Sprite):
             if self.maze[pos[0] - 4][pos[1]] == 0:
                 imageKey[11] = 0
 
-        # now we have built the correct image key for our character facing down
+        # now we have built the correct image key for our character facing left
         return imageKey
 
     def choseQuestion(self):
