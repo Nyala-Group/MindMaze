@@ -22,7 +22,7 @@ MAZE_SIZE = 15
 MINIMAP_SIZE = (2 * MAZE_SIZE + 1) * 10
 
 WIDTH = max((400 + MINIMAP_SIZE), 610)
-HEIGHT = max(515, (MINIMAP_SIZE + 115))
+HEIGHT = max(540, (MINIMAP_SIZE + 140))
 WHITE = (255, 255, 255)
 BLUE = (0, 0, 255)
 GREEN = (100, 180, 0)
@@ -33,7 +33,8 @@ DARK_WHITE = (50, 50, 50)
 BLOCK_WIDTH = 10
 BLOCK_HEIGHT = 10
 
-DEFAULT_FONT = pygame.font.Font(pygame.font.get_default_font(), 15)
+DEFAULT_FONT = pygame.font.Font("DejavuSansMono-5m7L.ttf", 15)
+
 
 questionsTotal = 0
 questionsRight = 0
@@ -160,13 +161,13 @@ class Maze:
             if self.grid[randColumn][randRow] == 1 and nTot < 3:
                 count += 1
                 self.grid[randColumn][randRow] = 0
-
+        """
         totalWalls = 0
         for y in range(self.size * 2 + 1):
             for x in range(self.size * 2 + 1):
                 totalWalls += self.grid[y][x]
-
         print(f"Walls: {totalWalls}")
+        """
         # Enumerate all dead ends in the maze and chose one as the end point of the maze.
         dead_ends = self.find_dead_ends()
         if dead_ends:
@@ -202,6 +203,8 @@ class Game(pygame.sprite.Sprite):
 
         self.toggleAltHallway = True
 
+        self.lives = 3
+
         self.mazeLevel = 1
         self.scorePercent = (questionsRight / questionsTotal) * 100
 
@@ -211,7 +214,6 @@ class Game(pygame.sprite.Sprite):
 
         self.wallView = "111011010000"
 
-        # Larger mazes are possible. I just did a quick test to see how fast mazes of size 16 load, and they load just the same as size 10.
         self.mazeSize = MAZE_SIZE
 
         newMaze = Maze(self.mazeSize)
@@ -463,10 +465,29 @@ class Game(pygame.sprite.Sprite):
         )
         self.screen.blit(scoreText, (10, (MINIMAP_SIZE + 25)))
 
+        # Render text to show lives
+        livesText = DEFAULT_FONT.render(f"Lives: " + ("♥️ " * self.lives), False, WHITE)
+        self.screen.blit(livesText, (10, (MINIMAP_SIZE + 50)))
+
+        # Render question background
+        qBkgTopLeftY = max(400, MINIMAP_SIZE + 75)
+        qBkgTopLeftX = 10
+        qBkgRect = pygame.Rect(
+            qBkgTopLeftX,
+            qBkgTopLeftY,
+            (WIDTH - 20),
+            130,
+        )
+        pygame.draw.rect(
+            self.screen,
+            DARK_WHITE,
+            qBkgRect,
+        )
+
         # Render mini map green arrow character
         self.screen.blit(self.arrow_img, self.arrow_rect)
 
-    # these last four functions give our character its line of sight checkUp(),checkDown(), checkRight(), checkLeft()
+    # these four functions give our character its line of sight checkUp(),checkDown(), checkRight(), checkLeft()
     def checkUp(self):
         # grab our current position
         pos = [self.arrow_rect.x // BLOCK_WIDTH, self.arrow_rect.y // BLOCK_HEIGHT]
@@ -737,6 +758,7 @@ class Game(pygame.sprite.Sprite):
         # now we have built the correct image key for our character facing left
         return imageKey
 
+    # These two functions handle the question retrieval and rendering.
     def choseQuestion(self):
         finishedSheet = True
         fileNum = 0
@@ -801,25 +823,20 @@ class Game(pygame.sprite.Sprite):
             qBkgTopLeftX,
             qBkgTopLeftY,
             (WIDTH - 20),
-            105,
-        )
-        pygame.draw.rect(
-            self.screen,
-            DARK_WHITE,
-            qBkgRect,
+            130,
         )
         qWidth, qHeight = DEFAULT_FONT.size(question)
-        if qWidth > (WIDTH - 40):
+        if qWidth > (WIDTH - 50):
             qWords = question.split(" ")
             maxLen = 0
             for i in range(len(qWords)):
                 testWidth, testHeight = DEFAULT_FONT.size(" ".join(qWords[:i]))
-                if testWidth >= (WIDTH - 40):
+                if testWidth >= (WIDTH - 50):
                     maxLen = i - 1
                     break
 
             firstLine = " ".join(qWords[:maxLen])
-            secondLine = " ".join(qWords[(maxLen + 1) :])
+            secondLine = " ".join(qWords[maxLen:])
             qText1 = DEFAULT_FONT.render(firstLine, False, WHITE)
             qText2 = DEFAULT_FONT.render(secondLine, False, WHITE)
             ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
@@ -828,11 +845,11 @@ class Game(pygame.sprite.Sprite):
             ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
 
             self.screen.blit(qText1, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
-            self.screen.blit(qText2, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 25)))
-            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 40)))
-            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 55)))
-            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
-            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 85)))
+            self.screen.blit(qText2, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 30)))
+            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 50)))
+            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
+            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 90)))
+            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 110)))
 
         else:
             qText = DEFAULT_FONT.render(question, False, WHITE)
@@ -842,10 +859,10 @@ class Game(pygame.sprite.Sprite):
             ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
 
             self.screen.blit(qText, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
-            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 25)))
-            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 40)))
-            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 55)))
-            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
+            self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 30)))
+            self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 50)))
+            self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
+            self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 90)))
 
 
 game = Game()
@@ -896,9 +913,17 @@ while True:
                     questionsRight += 1
                     game.scorePercent = (questionsRight / questionsTotal) * 100
                     questionActive = False
+                    if game.lives < 3:
+                        game.lives += 1
                     game.mazeGenerate()
                 else:
-                    question, answerDict, correctAnswer = game.choseQuestion()
+                    game.lives -= 1
+                    if game.lives <= 0:
+                        pygame.quit()
+                        # Print score and level
+                        sys.exit("Game Over")
+                    else:
+                        question, answerDict, correctAnswer = game.choseQuestion()
 
             if event.key == pygame.K_b and questionActive == True:
                 # Check if letter chosen is the same as the correct answer.
@@ -908,9 +933,17 @@ while True:
                     questionsRight += 1
                     game.scorePercent = (questionsRight / questionsTotal) * 100
                     questionActive = False
+                    if game.lives < 3:
+                        game.lives += 1
                     game.mazeGenerate()
                 else:
-                    question, answerDict, correctAnswer = game.choseQuestion()
+                    game.lives -= 1
+                    if game.lives <= 0:
+                        pygame.quit()
+                        # Print score and level
+                        sys.exit("Game Over")
+                    else:
+                        question, answerDict, correctAnswer = game.choseQuestion()
 
             if event.key == pygame.K_c and questionActive == True:
                 # Check if letter chosen is the same as the correct answer.
@@ -920,9 +953,17 @@ while True:
                     questionsRight += 1
                     game.scorePercent = (questionsRight / questionsTotal) * 100
                     questionActive = False
+                    if game.lives < 3:
+                        game.lives += 1
                     game.mazeGenerate()
                 else:
-                    question, answerDict, correctAnswer = game.choseQuestion()
+                    game.lives -= 1
+                    if game.lives <= 0:
+                        pygame.quit()
+                        # Print score and level
+                        sys.exit("Game Over")
+                    else:
+                        question, answerDict, correctAnswer = game.choseQuestion()
 
             if event.key == pygame.K_d and questionActive == True:
                 # Check if letter chosen is the same as the correct answer.
@@ -932,9 +973,17 @@ while True:
                     questionsRight += 1
                     game.scorePercent = (questionsRight / questionsTotal) * 100
                     questionActive = False
+                    if game.lives < 3:
+                        game.lives += 1
                     game.mazeGenerate()
                 else:
-                    question, answerDict, correctAnswer = game.choseQuestion()
+                    game.lives -= 1
+                    if game.lives <= 0:
+                        pygame.quit()
+                        # Print score and level
+                        sys.exit("Game Over")
+                    else:
+                        question, answerDict, correctAnswer = game.choseQuestion()
 
     game.play_step()
     if questionActive:
