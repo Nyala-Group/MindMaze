@@ -56,6 +56,7 @@ QUESTION_FILES = ["Q_A_easy.txt", "Q_A_medium.txt", "Q_A_hard.txt"]
 questionsTotal = 0
 questionsRight = 0
 questionsAnswered = []
+devMode = False
 
 # Enumerate the questions in all of the question files
 for file in QUESTION_FILES:
@@ -113,6 +114,7 @@ class Maze:
         self.grid = [[1 for _ in range(size * 2 + 1)] for _ in range(size * 2 + 1)]
         self.visited = [[False for _ in range(size)] for _ in range(size)]
         self.stack = []
+        self.end = []
 
     # Helper function - returns False if coordinate is outside maze boundaries.
     def in_bounds(self, x, y):
@@ -208,13 +210,26 @@ class Maze:
                 count += 1
                 self.grid[randColumn][randRow] = 0
 
-        # Enumerate all dead ends in the maze and chose one as the end point of the maze.
+        # Enumerate all dead ends in the maze and chose some as the end points of the maze.
         # If there are no dead ends somehow, default to the bottom-right corner of the maze.
         dead_ends = self.find_dead_ends()
         if dead_ends:
-            self.end = dead_ends[random.randint(-((len(dead_ends) // 4)), -1)]
+            # First exit - From 1/3 to 1/2
+            self.end.append(
+                dead_ends[
+                    random.randint(-((len(dead_ends) * 2) // 3), -(len(dead_ends) // 2))
+                ]
+            )
+            # Second exit - From 1/2 to 2/3
+            self.end.append(
+                dead_ends[
+                    random.randint(-(len(dead_ends) // 2), -(len(dead_ends) // 3))
+                ]
+            )
+            # Third exit - From 2/3 to end.
+            self.end.append(dead_ends[random.randint(-(len(dead_ends) // 3), -1)])
         else:
-            self.end = (self.size * 2 - 1, self.size * 2 - 1)
+            self.end.append((self.size * 2 - 1, self.size * 2 - 1))
 
         return self.grid, self.end
 
@@ -498,14 +513,15 @@ class Game(pygame.sprite.Sprite):
             pygame.draw.rect(self.screen, BLACK, (wall[0], wall[1], wall[2], wall[3]))
 
         # Render the end point in red - For testing and development purposes
-        end_y, end_x = self.mazeEnd
-        pygame.draw.rect(
-            self.screen,
-            RED,
-            pygame.Rect(
-                end_x * BLOCK_WIDTH, end_y * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT
-            ),
-        )
+        for item in self.mazeEnd:
+            end_y, end_x = item
+            pygame.draw.rect(
+                self.screen,
+                RED,
+                pygame.Rect(
+                    end_x * BLOCK_WIDTH, end_y * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT
+                ),
+            )
 
         # Render text to show level
         levelText = DEFAULT_FONT.render(f"Level: {self.mazeLevel}", False, WHITE)
@@ -831,9 +847,11 @@ class Game(pygame.sprite.Sprite):
             for i in range(numQsInFile):
                 if (fileNum, i) not in questionsAnswered:
                     finishedSheet = False
-                    break
+                    continue
 
+            if finishedSheet:
                 fileNum += 1
+                qFile = QUESTION_FILES[fileNum]
                 if fileNum == len(QUESTION_FILES):
                     pygame.quit()
                     sys.exit("YOU WIN")
@@ -886,13 +904,13 @@ class Game(pygame.sprite.Sprite):
             130,
         )
         qWidth, qHeight = DEFAULT_FONT.size(question)
-        if qWidth > (WIDTH - 50):
+        if qWidth > (WIDTH - 30):
             qWords = question.split(" ")
             maxLen = 0
             for i in range(len(qWords)):
                 testWidth, testHeight = DEFAULT_FONT.size(" ".join(qWords[:i]))
-                if testWidth >= (WIDTH - 50):
-                    maxLen = i - 1
+                if testWidth >= (WIDTH - 100):
+                    maxLen = (i - 1) - len(qWords)
                     break
 
             firstLine = " ".join(qWords[:maxLen])
@@ -933,6 +951,12 @@ answerDict = None
 correctAnswer = None
 # Main game loop
 while True:
+    keys = pygame.key.get_pressed()
+    if not devMode:
+        if keys[pygame.K_LCTRL] and keys[pygame.K_RSHIFT]:
+            devMode = True
+            print("Dev Mode active")
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             pygame.quit()
@@ -950,12 +974,12 @@ while True:
                 game.toggleAltHallway = not game.toggleAltHallway
                 game.moveForward(game.dir)
 
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and not questionActive:
                 pos = (
                     game.arrow_rect.y // BLOCK_WIDTH,
                     game.arrow_rect.x // BLOCK_HEIGHT,
                 )
-                if pos == game.mazeEnd:
+                if pos in game.mazeEnd:
                     question, answerDict, correctAnswer = game.choseQuestion()
                     questionActive = True
 
@@ -963,7 +987,7 @@ while True:
                 pygame.quit()
                 sys.exit()
 
-            if event.key == pygame.K_z:
+            if event.key == pygame.K_z and devMode:
                 # Debug re-generate maze to quicken testing - potentially remove or obfuscate
                 game.mazeGenerate()
 
@@ -979,7 +1003,8 @@ while True:
                         game.lives += 1
                     game.mazeGenerate()
                 else:
-                    game.lives -= 1
+                    if not devMode:
+                        game.lives -= 1
                     if game.lives <= 0:
                         pygame.quit()
                         # Print score and level
@@ -999,7 +1024,8 @@ while True:
                         game.lives += 1
                     game.mazeGenerate()
                 else:
-                    game.lives -= 1
+                    if not devMode:
+                        game.lives -= 1
                     if game.lives <= 0:
                         pygame.quit()
                         # Print score and level
@@ -1019,7 +1045,8 @@ while True:
                         game.lives += 1
                     game.mazeGenerate()
                 else:
-                    game.lives -= 1
+                    if not devMode:
+                        game.lives -= 1
                     if game.lives <= 0:
                         pygame.quit()
                         # Print score and level
@@ -1039,7 +1066,8 @@ while True:
                         game.lives += 1
                     game.mazeGenerate()
                 else:
-                    game.lives -= 1
+                    if not devMode:
+                        game.lives -= 1
                     if game.lives <= 0:
                         pygame.quit()
                         # Print score and level
@@ -1053,7 +1081,7 @@ while True:
             game.arrow_rect.y // BLOCK_WIDTH,
             game.arrow_rect.x // BLOCK_HEIGHT,
         )
-        if pos == game.mazeEnd:
+        if pos in game.mazeEnd:
             game.questionPrompt(question, answerDict)
     game.clock.tick(60)
     pygame.display.flip()
