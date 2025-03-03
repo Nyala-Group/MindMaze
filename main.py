@@ -513,15 +513,19 @@ class Game(pygame.sprite.Sprite):
             pygame.draw.rect(self.screen, BLACK, (wall[0], wall[1], wall[2], wall[3]))
 
         # Render the end point in red - For testing and development purposes
-        for item in self.mazeEnd:
-            end_y, end_x = item
-            pygame.draw.rect(
-                self.screen,
-                RED,
-                pygame.Rect(
-                    end_x * BLOCK_WIDTH, end_y * BLOCK_HEIGHT, BLOCK_WIDTH, BLOCK_HEIGHT
-                ),
-            )
+        if devMode:
+            for item in self.mazeEnd:
+                end_y, end_x = item
+                pygame.draw.rect(
+                    self.screen,
+                    RED,
+                    pygame.Rect(
+                        end_x * BLOCK_WIDTH,
+                        end_y * BLOCK_HEIGHT,
+                        BLOCK_WIDTH,
+                        BLOCK_HEIGHT,
+                    ),
+                )
 
         # Render text to show level
         levelText = DEFAULT_FONT.render(f"Level: {self.mazeLevel}", False, WHITE)
