@@ -896,7 +896,7 @@ class Game(pygame.sprite.Sprite):
 
         return question, answerChars, corrChar
 
-    # Function to handle displaying the question
+        # Function to handle displaying the question
     def questionPrompt(self, question: str, answerChars: dict):
         # Display question and answers
         qBkgTopLeftY = max(400, MINIMAP_SIZE)
@@ -921,10 +921,10 @@ class Game(pygame.sprite.Sprite):
             secondLine = " ".join(qWords[maxLen:])
             qText1 = DEFAULT_FONT.render(firstLine, False, WHITE)
             qText2 = DEFAULT_FONT.render(secondLine, False, WHITE)
-            ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
-            ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
-            ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
-            ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
+            ansA = DEFAULT_FONT.render(f"a. {answerChars['a']}", False, WHITE)
+            ansB = DEFAULT_FONT.render(f"b. {answerChars['b']}", False, WHITE)
+            ansC = DEFAULT_FONT.render(f"c. {answerChars['c']}", False, WHITE)
+            ansD = DEFAULT_FONT.render(f"d. {answerChars['d']}", False, WHITE)
 
             self.screen.blit(qText1, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
             self.screen.blit(qText2, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 30)))
@@ -935,18 +935,17 @@ class Game(pygame.sprite.Sprite):
 
         else:
             qText = DEFAULT_FONT.render(question, False, WHITE)
-            ansA = DEFAULT_FONT.render(f"a. {answerChars["a"]}", False, WHITE)
-            ansB = DEFAULT_FONT.render(f"b. {answerChars["b"]}", False, WHITE)
-            ansC = DEFAULT_FONT.render(f"c. {answerChars["c"]}", False, WHITE)
-            ansD = DEFAULT_FONT.render(f"d. {answerChars["d"]}", False, WHITE)
+            ansA = DEFAULT_FONT.render(f"a. {answerChars['a']}", False, WHITE)
+            ansB = DEFAULT_FONT.render(f"b. {answerChars['b']}", False, WHITE)
+            ansC = DEFAULT_FONT.render(f"c. {answerChars['c']}", False, WHITE)
+            ansD = DEFAULT_FONT.render(f"d. {answerChars['d']}", False, WHITE)
 
             self.screen.blit(qText, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 10)))
             self.screen.blit(ansA, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 30)))
             self.screen.blit(ansB, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 50)))
             self.screen.blit(ansC, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 70)))
             self.screen.blit(ansD, ((qBkgTopLeftX + 10), (qBkgTopLeftY + 90)))
-
-
+            
 # Initialize game instance and initialize global question vars.
 game = Game()
 questionActive = False
